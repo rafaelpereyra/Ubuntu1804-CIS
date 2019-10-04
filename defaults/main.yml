@@ -397,10 +397,17 @@ ubuntu1804cis_syslog: rsyslog
 # ubuntu1804cis_syslog: syslog-ng
 
 ubuntu1804cis_vartmp:
+  source: /var/tmp
+  fstype: false
+  opts: "defaults, nodev, nosuid, noexec, bind"
+  enabled: false
+
+ubuntu1804cis_tmp:
   source: /tmp
   fstype: false
   opts: "defaults, nodev, nosuid, noexec, bind"
   enabled: false
+
 
 ###### Multi OS Vars ###########
 prelim_check_package_command:
