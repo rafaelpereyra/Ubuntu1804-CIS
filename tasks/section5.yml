@@ -440,7 +440,7 @@
             state: present
             dest: /etc/pam.d/common-password
             regexp: '^password[\s]*requisite[\s]*pam_pwquality\.so'
-            line: password requisite pam_pwquality.so try_first_pass retry=3
+            line: password      requisite pam_pwquality.so      try_first_pass retry=3
 
       - name: "SCORED | 5.3.1 | PATCH | Ensure password creation requirements are configured"
         lineinfile:
