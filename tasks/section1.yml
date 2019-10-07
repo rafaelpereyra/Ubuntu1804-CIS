@@ -570,7 +570,22 @@
       - patch
       - rule_1.3.1
 
-- name: "SCORED | 1.3.2 | PATCH | Ensure filesystem integrity is regularly checked"
+# Add checking the content of the script
+- name: "SCORED | 1.3.2 | PATCH | Ensure filesystem integrity is regularly checked (cron.daily)"
+  stat:
+      path: /etc/cron.daily/aide
+  register: aide_in_cron_daily
+  when:
+      - ubuntu1804cis_rule_1_3_2
+  tags:
+      - level1
+      - scored
+      - aide
+      - file_integrity
+      - patch
+      - rule_1.3.2
+
+- name: "SCORED | 1.3.2 | PATCH | Ensure filesystem integrity is regularly checked (crontab)"
   cron:
       name: Run AIDE integrity check weekly
       cron_file: "{{ ubuntu1804cis_aide_cron['cron_file'] }}"
@@ -583,6 +598,7 @@
       job: "{{ ubuntu1804cis_aide_cron['aide_job'] }}"
   when:
       - ubuntu1804cis_rule_1_3_2
+      - not aide_in_cron_daily.stat.exists
   tags:
       - level1
       - scored

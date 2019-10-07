@@ -196,7 +196,7 @@
   with_items:
       - { name: net.ipv6.conf.all.accept_ra, value: 0 }
       - { name: net.ipv6.conf.default.accept_ra, value: 0 }
-  when: ubuntu1804cis_ipv6_required
+  when: not ubuntu1804cis_ipv6_required
   notify:
       - sysctl flush ipv6 route table
   tags:
@@ -217,7 +217,7 @@
   with_items:
       - { name: net.ipv6.conf.all.accept_redirects, value: 0 }
       - { name: net.ipv6.conf.default.accept_redirects, value: 0 }
-  when: ubuntu1804cis_ipv6_required
+  when: not ubuntu1804cis_ipv6_required
   notify:
       - sysctl flush ipv6 route table
   tags:
@@ -229,16 +229,17 @@
 
 - name: "NOTSCORED | 3.3.3 | PATCH | Ensure IPv6 is disabled"
   lineinfile:
-      dest: /etc/modprobe.d/CIS.conf
-      regexp: "^(#)?options ipv6 disable="
-      line: "options ipv6 disable=1"
-      create: true
+      dest: /etc/default/grub
+      regexp: "(#)?GRUB_CMDLINE_LINUX="
+      line: "GRUB_CMDLINE_LINUX=\"ipv6.disable=1\""
+      create: false
   when: not ubuntu1804cis_ipv6_required
   tags:
       - level1
       - notscored
       - patch
       - rule_3.3.3
+  notify: generate new grub config
 
 - name: "SCORED | 3.4.1 | PATCH | Ensure TCP Wrappers is installed"
   apt:

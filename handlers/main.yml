@@ -93,3 +93,9 @@
       - not ubuntu1804cis_skip_for_travis
   tags:
       - skip_ansible_lint
+
+- name: reload rsyslog
+  become: true
+  service:
+      name: rsyslog
+      state: restarted

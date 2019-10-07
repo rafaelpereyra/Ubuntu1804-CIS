@@ -396,6 +396,8 @@ ubuntu1804cis_pass:
 ubuntu1804cis_syslog: rsyslog
 # ubuntu1804cis_syslog: syslog-ng
 
+ubuntu1804cis_max_log_file: 10
+
 ubuntu1804cis_vartmp:
   source: /var/tmp
   fstype: false
