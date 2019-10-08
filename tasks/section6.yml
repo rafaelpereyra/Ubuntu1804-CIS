@@ -58,7 +58,7 @@
       dest: /etc/gshadow
       owner: root
       group: shadow
-      mode: 0640
+      mode: 0610
   when:
       - ubuntu1804cis_rule_6_1_5
   tags:

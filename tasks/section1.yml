@@ -688,13 +688,12 @@
     executable: /bin/bash
   when:
       - ubuntu1804cis_rule_1_4_3
-      - current_root_password.stdout | length > 0
+      - ubuntu1804cis_root_password is defined
   tags:
       - level1
       - notscored
       - patch
       - rule_1.4.3
-      - notimplemented
 
 - name: "SCORED | 1.5.1 | PATCH | Ensure core dumps are restricted"
   lineinfile:
