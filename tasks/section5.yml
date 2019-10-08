@@ -598,7 +598,7 @@
       - name: "SCORED | 5.4.4 | PATCH | Ensure default user umask is 027 or more restrictive - /etc/bashrc (Check if exists)"
         lineinfile:
             dest: /etc/bash.bashrc
-            regexp: '(^\s+umask) [\d]+'
+            regexp: '(^\s*umask)[\s]+[\d]+'
             state: present
             line: umask 027
 
@@ -611,7 +611,7 @@
       - name: "SCORED | 5.4.4 | PATCH | Ensure default user umask is 027 or more restrictive - /etc/profile (Check if exists)"
         lineinfile:
             dest: /etc/profile
-            regexp: '(^\s+umask) [\d]+'
+            regexp: '(^\s*umask)[\s]+[\d]+'
             state: present
             line: umask 027            
   when:
@@ -621,6 +621,49 @@
       - patch
       - rule_5.4.4
       - scored
+
+- name: "SCORED | 5.4.5 | PATCH | Ensure default user shell timeout is 900 seconds or less"
+  block:
+
+      - name: "SCORED | 5.4.5 | PATCH | Check if bashrc exists"
+        stat:
+            path: "/etc/bash.bashrc"
+        register: bashrc_present
+
+      - name: "SCORED | 5.4.5 | PATCH | Ensure default user shell timeout is 900 seconds or less - /etc/bashrc"
+        replace:
+            path: /etc/bash.bashrc
+            regexp: '(^\s*TMOUT=\s*)[\d]+'
+            replace: 'TMOUT=900'
+        when: bashrc_present.stat.exists
+
+      - name: "SCORED | 5.4.5 | PATCH | Ensure default user shell timeout is 900 seconds or less - /etc/bashrc (Check if exists)"
+        lineinfile:
+            dest: /etc/bash.bashrc
+            regexp: '^\s*TMOUT=\s*[\d]+'
+            state: present
+            line: TMOUT=900
+
+      - name: "SCORED | 5.4.5 | PATCH | Ensure default user shell timeout is 900 seconds or less - /etc/profile"
+        replace:
+            path: /etc/profile
+            regexp: '(^\s*TMOUT=\s*)[\d]+'
+            replace: 'TMOUT=900'
+
+      - name: "SCORED | 5.4.5 | PATCH | Ensure default user shell timeout is 900 seconds or less - /etc/profile (Check if exists)"
+        lineinfile:
+            dest: /etc/profile
+            regexp: '^\s*TMOUT=\s*[\d]+'
+            state: present
+            line: TMOUT=900
+  when:
+      - ubuntu1804cis_rule_5_4_5
+  tags:
+      - level2
+      - patch
+      - rule_5.4.5
+      - scored
+
 
 - name: "NOTSCORED | 5.5 | PATCH | Ensure root login is restricted to system console"
   command: /bin/true
