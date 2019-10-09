@@ -208,12 +208,30 @@
   when:
       - ubuntu1804cis_rule_1_1_2
       - not ubuntu1804cis_skip_for_travis
+      - not ubuntu1804cis_tmp['enabled']
   tags:
       - level2
       - scored
       - patch
       - rule_1.1.2
 
+- name: "SCORED | 1.1.2 | PATCH | Ensure separate partition exists for /tmp"
+  shell: mount | grep "on /tmp "
+  register: tmp_mounted
+  changed_when: false
+  failed_when: false
+  when:
+      - ubuntu1804cis_rule_1_1_2
+      - ubuntu1804cis_tmp['enabled']
+  tags:
+      - level2
+      - scored
+      - patch
+      - rule_1.1.2
+      - skip_ansible_lint
+
+
+        
 - name: "SCORED | 1.1.2 | PATCH | Ensure separate partition exists for /tmp | enable and start/restart tmp.mount"
   systemd:
       name: tmp.mount
@@ -224,6 +242,7 @@
   when:
       - ubuntu1804cis_rule_1_1_2
       - not ubuntu1804cis_skip_for_travis
+      - not ubuntu1804cis_tmp['enabled']
   tags:
       - level2
       - scored
@@ -247,12 +266,34 @@
   when:
       - ubuntu1804cis_rule_1_1_3
       - ubuntu1804cis_rule_1_1_4
+      - not ubuntu1804cis_tmp['enabled']
   tags:
       - level1
       - scored
       - patch
       - rule_1.1.3
       - rule_1.1.4
+
+- name: "SCORED | 1.1.3  | PATCH | Ensure nodev option set on /tmp partition\n
+         SCORED | 1.1.4  | PATCH | Ensure nosuid option set on /tmp partition"
+  mount:
+      name: /tmp
+      src: "{{ ubuntu1804cis_tmp['source'] }}"
+      state: mounted
+      fstype: "{{ ubuntu1804cis_tmp['fstype'] }}"
+      opts: "{{ ubuntu1804cis_tmp['opts'] }}"
+  when:
+      - ubuntu1804cis_tmp['enabled']
+      - ubuntu1804cis_rule_1_1_3
+      - ubuntu1804cis_rule_1_1_4
+  tags:
+      - level1
+      - scored
+      - patch
+      - rule_1.1.3
+      - rule_1.1.4
+
+
 
 - name: "SCORED | 1.1.5 | PATCH | Ensure separate partition exists for /var"
   shell: mount | grep "on /var "
@@ -282,6 +323,7 @@
       - rule_1.1.6
       - skip_ansible_lint
 
+
 - name: "SCORED | 1.1.7  | PATCH | Ensure nodev option set on /var/tmp partition\n
          SCORED | 1.1.8  | PATCH | Ensure nosuid option set on /var/tmp partition\n
          SCORED | 1.1.9 | PATCH | Ensure noexec option set on /var/tmp partition"
@@ -292,7 +334,7 @@
       fstype: "{{ ubuntu1804cis_vartmp['fstype'] }}"
       opts: "{{ ubuntu1804cis_vartmp['opts'] }}"
   when:
-      - ubuntu1804cis_vartmp['enabled'] == 'yes'
+      - ubuntu1804cis_vartmp['enabled']
       - ubuntu1804cis_rule_1_1_7
       - ubuntu1804cis_rule_1_1_8
       - ubuntu1804cis_rule_1_1_9
@@ -528,7 +570,22 @@
       - patch
       - rule_1.3.1
 
-- name: "SCORED | 1.3.2 | PATCH | Ensure filesystem integrity is regularly checked"
+# Add checking the content of the script
+- name: "SCORED | 1.3.2 | PATCH | Ensure filesystem integrity is regularly checked (cron.daily)"
+  stat:
+      path: /etc/cron.daily/aide
+  register: aide_in_cron_daily
+  when:
+      - ubuntu1804cis_rule_1_3_2
+  tags:
+      - level1
+      - scored
+      - aide
+      - file_integrity
+      - patch
+      - rule_1.3.2
+
+- name: "SCORED | 1.3.2 | PATCH | Ensure filesystem integrity is regularly checked (crontab)"
   cron:
       name: Run AIDE integrity check weekly
       cron_file: "{{ ubuntu1804cis_aide_cron['cron_file'] }}"
@@ -541,6 +598,7 @@
       job: "{{ ubuntu1804cis_aide_cron['aide_job'] }}"
   when:
       - ubuntu1804cis_rule_1_3_2
+      - not aide_in_cron_daily.stat.exists
   tags:
       - level1
       - scored
@@ -630,13 +688,12 @@
     executable: /bin/bash
   when:
       - ubuntu1804cis_rule_1_4_3
-      - current_root_password.stdout | length > 0
+      - ubuntu1804cis_root_password is defined
   tags:
       - level1
       - notscored
       - patch
       - rule_1.4.3
-      - notimplemented
 
 - name: "SCORED | 1.5.1 | PATCH | Ensure core dumps are restricted"
   lineinfile:

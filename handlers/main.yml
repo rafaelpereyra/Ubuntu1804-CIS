@@ -15,6 +15,7 @@
       name: net.ipv6.route.flush
       value: "1"
       sysctl_set: true
+      ignoreerrors: true
   when: ansible_virtualization_type != "docker"
 
 - name: systemd restart tmp.mount
@@ -93,3 +94,9 @@
       - not ubuntu1804cis_skip_for_travis
   tags:
       - skip_ansible_lint
+
+- name: reload rsyslog
+  become: true
+  service:
+      name: rsyslog
+      state: restarted
